@@ -1,0 +1,926 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[varqu,scaled=0.95]{zi4}
+\usepackage{amsmath,amssymb,amsthm,mathtools}
+\usepackage[dvipsnames]{xcolor}
+\usepackage{fvextra}
+\usepackage{booktabs,enumitem,microtype,needspace}
+\usepackage[colorlinks,linkcolor=MidnightBlue,citecolor=MidnightBlue,urlcolor=MidnightBlue]{hyperref}
+\usepackage[capitalise,nameinlink]{cleveref}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+\newcommand{\leanname}[1]{\texttt{\detokenize{#1}}}
+\newenvironment{leanblock}[1]
+  {\par\smallskip\Needspace{4\baselineskip}\noindent{\footnotesize\textsf{#1}}\par\nopagebreak\vspace{2pt}}
+  {\par\medskip}
+\fvset{breaklines=true,breakanywhere=true,fontsize=\footnotesize,frame=leftline,
+  framerule=0.8pt,rulecolor=\color{gray!60},xleftmargin=4pt,framesep=6pt}
+\usepackage{longtable}
+\newcommand{\unverified}{\quad\textup{\small[not machine-verified]}}
+
+\newcommand{\CC}{\mathbb{C}}
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\monus}{\mathbin{\dot{-}}}
+\newcommand{\wt}{\widetilde{w}}
+\DeclareMathOperator{\GL}{GL}
+\DeclareMathOperator{\Aut}{Aut}
+\DeclareMathOperator{\coeff}{coeff}
+\DeclareMathOperator{\id}{id}
+
+\title{Consistency of the presentation of $G_{\mathfrak m}$: no generator is forced to be trivial}
+\date{}
+\begin{document}
+\maketitle
+\begin{abstract}
+We study the group $G_{\mathfrak m}$, defined by generators and relations in Section 7 of the source (the presentation theorem). The authors asked whether its relations are consistent, and the answer is yes. For an arbitrary function $c\colon\mathbb N\to\mathbb N$ in place of the coefficients of $J$, none of the generators $X_{-1}(u)$, $Y_{-1}(u)$ ($u\neq0$), $H_1(s)$, $H_2(s)$ ($s\neq1$), $X_{\ell,jk}(u)$, $Y_{\ell,jk}(u)$ ($u\neq0$) is trivial in $G_{\mathfrak m}$. The real generators are detected by the natural map to $\mathrm{GL}_2(\mathbb C)$. Each pair of imaginary generators $X_{\ell,jk},Y_{\ell,jk}$ is detected by a representation on $\mathbb C[x_0,x_1,z]$: there $\mathrm{GL}_2(\mathbb C)$ acts by linear substitution, and $X_{\ell,jk},Y_{\ell,jk}$ act as transvections between two monomials of suitable torus weights, while all other imaginary generators act trivially. All lemmas and the main theorem are machine-verified, with the full index set and all listed relations, (Im:2) included.
+\end{abstract}
+
+\begin{center}\small
+\begin{tabular}{@{}ll@{}}
+\toprule
+Source & Carbone, Jurisich, Murray, A Lie group analog for the Monster Lie algebra (journal version, 2026-10-21), Section 7, GSimpleGm\_Consistent \\
+Status & proof machine-verified (Lean 4, Mathlib) \\
+Lemmas & 37 \\
+Text & written by claude-opus-5-5, checked against the Lean source \\
+Run & \texttt{srv\_20261021\_203715\_GSimpleGm\_Consistent} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\tableofcontents
+
+\section{Setting}
+
+Throughout, $\NN=\{0,1,2,\dots\}$ and $\CC^\times=\CC\setminus\{0\}$. We fix an arbitrary function $c\colon\NN\to\NN$; in the source $c(j)$ is the coefficient of $q^j$ in $J$, but no property of these values is used.
+
+\begin{definition}[Index set and reflection]
+Let
+\[
+E=\{(\ell,j,k)\in\NN^3 : 1\le k\le c(j),\ \ell<j\}.
+\]
+For $e\in E$ write $e=(\ell_e,j_e,k_e)$. The \emph{reflection} of $e$ is
+\[
+e^\ast=(j_e-1-\ell_e,\ j_e,\ k_e).
+\]
+Since $\ell_e<j_e$, the number $j_e-1-\ell_e$ is a natural number $<j_e$, so $e^\ast\in E$. Note that $j_{e^\ast}=j_e$ and $k_{e^\ast}=k_e$.
+\end{definition}
+
+\begin{definition}[The constants $c_{\ell j}$]
+For $\ell,j\in\NN$ put
+\[
+c_{\ell j}=(-1)^{\ell+1}\binom{j\monus 1}{\ell}(\ell+1)(j-\ell)\in\CC .
+\]
+Here $\monus$ is truncated subtraction in $\NN$ and $j-\ell$ is computed in $\CC$. The constant is only used for $\ell<j$, where $j\monus1=j-1$. For $e\in E$ we abbreviate $c_e=c_{\ell_e j_e}$. The two-index constants $c_{\ell j}$ are unrelated to the function $c$.
+\end{definition}
+
+\begin{definition}[Symbols and abbreviations]
+Let $\mathcal X$ be the set of symbols
+\[
+H_1(s),\ H_2(s)\ (s\in\CC^\times),\qquad X_{-1}(u),\ Y_{-1}(u)\ (u\in\CC),\qquad X_e(u),\ Y_e(u)\ (e\in E,\ u\in\CC),
+\]
+all distinct. Here $X_e(u)$ stands for $X_{\ell,jk}(u)$ when $e=(\ell,j,k)$, and similarly for $Y_e(u)$. Let $F(\mathcal X)$ be the free group on $\mathcal X$. In $F(\mathcal X)$ put, for $s\in\CC^\times$,
+\[
+\wt(s)=X_{-1}(s)\,Y_{-1}(-s^{-1})\,X_{-1}(s),\qquad \wt=\wt(1)=X_{-1}(1)Y_{-1}(-1)X_{-1}(1),
+\]
+and write $(a,b)=aba^{-1}b^{-1}$ for the commutator. These are abbreviations for words in the generators, not new generators.
+\end{definition}
+
+\begin{definition}[Relators and the group $G_{\mathfrak m}$]
+A relation $a=b$ is encoded by the relator $ab^{-1}$, and a relation $(a,b)=1$ by the relator $(a,b)$. Let $\mathcal R\subseteq F(\mathcal X)$ be the set of relators of the following families. Each family is imposed for all $s,t\in\CC^\times$, all $u,v\in\CC$ and all $e,f\in E$ satisfying the stated side conditions.
+
+\begin{align*}
+&\text{(H:1a)} & H_1(s)H_1(t)&=H_1(st), & &\text{(H:1b)} & H_2(s)H_2(t)&=H_2(st),\\
+&\text{(H:2)} & H_1(s)H_2(t)&=H_2(t)H_1(s), & &\text{(Re:1a)} & X_{-1}(u)X_{-1}(v)&=X_{-1}(u+v),\\
+&\text{(Re:1b)} & Y_{-1}(u)Y_{-1}(v)&=Y_{-1}(u+v), & &\text{(Re:3)} & \wt(s)\wt&=H_1(-s)H_2(-s^{-1}),\\
+&\text{(Re:4a)} & \wt X_{-1}(u)\wt^{-1}&=Y_{-1}(-u), & &\text{(Re:4b)} & \wt Y_{-1}(u)\wt^{-1}&=X_{-1}(-u),\\
+&\text{(Re:5a)} & \wt H_1(s)\wt^{-1}&=H_2(s), & &\text{(Re:5b)} & \wt H_2(s)\wt^{-1}&=H_1(s),\\
+&\text{(Re:6a)} & H_1(s)X_{-1}(u)H_1(s)^{-1}&=X_{-1}(su), & &\text{(Re:6b)} & H_2(s)X_{-1}(u)H_2(s)^{-1}&=X_{-1}(s^{-1}u),\\
+&\text{(Re:6c)} & H_1(s)Y_{-1}(u)H_1(s)^{-1}&=Y_{-1}(s^{-1}u), & &\text{(Re:6d)} & H_2(s)Y_{-1}(u)H_2(s)^{-1}&=Y_{-1}(su),\\
+&\text{(Im:1a)} & X_e(u)X_e(v)&=X_e(u+v), & &\text{(Im:1b)} & Y_e(u)Y_e(v)&=Y_e(u+v).
+\end{align*}
+
+The remaining families are:
+\begin{align*}
+&\text{(Re:2)} & Y_{-1}(-t)X_{-1}(s)Y_{-1}(t)&=X_{-1}(-t^{-1})\,Y_{-1}(-t^2s)\,X_{-1}(t^{-1}),\\
+&\text{(Im:2)} & Y_e(-t)X_e(s)Y_e(t)&=X_e\!\left(\tfrac{-t^{-1}}{c_e}\right)Y_e(-c_et^2s)\,X_e\!\left(\tfrac{t^{-1}}{c_e}\right),\\
+&\text{(Im:6a)} & H_1(s)X_e(u)H_1(s)^{-1}&=X_e(s^{\ell_e+1}u),\\
+&\text{(Im:6b)} & H_2(s)X_e(u)H_2(s)^{-1}&=X_e(s^{j_e-\ell_e}u),\\
+&\text{(Im:6c)} & H_1(s)Y_e(u)H_1(s)^{-1}&=Y_e((s^{-1})^{\ell_e+1}u),\\
+&\text{(Im:6d)} & H_2(s)Y_e(u)H_2(s)^{-1}&=Y_e((s^{-1})^{j_e-\ell_e}u),\\
+&\text{(U:1a)} & (X_{-1}(u),X_e(v))&=1\quad\text{if } \ell_e=j_e-1,\\
+&\text{(U:1b)} & (Y_{-1}(u),Y_e(v))&=1\quad\text{if } \ell_e=j_e-1,\\
+&\text{(U:1c)} & (Y_{-1}(u),X_e(v))&=1\quad\text{if } \ell_e=0,\\
+&\text{(U:1d)} & (X_{-1}(u),Y_e(v))&=1\quad\text{if } \ell_e=0,\\
+&\text{(U:2)} & (X_e(u),Y_f(v))&=1\quad\text{if } j_e\neq j_f \text{ or } k_e\ne k_f \text{ or } |\ell_e-\ell_f|>1,\\
+&\text{(U:4a)} & \wt X_e(u)\wt^{-1}&=X_{e^\ast}((-1)^{\ell_e}u),\\
+&\text{(U:4b)} & \wt Y_e(u)\wt^{-1}&=Y_{e^\ast}((-1)^{j_e-\ell_e-1}u),\\
+&\text{(U:5a)} & Y_{-1}(s)&=X_{-1}(s^{-1})H_1(-s^{-1})H_2(-s)\,\wt\,X_{-1}(s^{-1}).
+\end{align*}
+
+Set $G_{\mathfrak m}=F(\mathcal X)/\langle\!\langle\mathcal R\rangle\!\rangle$, the quotient by the normal closure of $\mathcal R$. The image of a symbol in $G_{\mathfrak m}$ is denoted by the same symbol.
+
+For a group $T$ and a map $F\colon\mathcal X\to T$, let $\widehat F\colon F(\mathcal X)\to T$ be the induced homomorphism. By the universal property, if $\widehat F(r)=1$ for all $r\in\mathcal R$, then there is a homomorphism $G_{\mathfrak m}\to T$ sending each symbol $\xi$ to $F(\xi)$. In particular, $F(\xi)\ne 1$ then implies $\xi\neq1$ in $G_{\mathfrak m}$.
+\end{definition}
+
+These are exactly the relations of the source. The full index set $E$ is used, without the constraint $j=2\ell+1$. Relation (Im:2) is kept. Each family is imposed precisely for the stated ranges of parameters; (U:4) is imposed for every $e\in E$, since $e^\ast\in E$ always.
+
+\begin{theorem}\label{thm:main}
+Let $c\colon\NN\to\NN$ be arbitrary and let $G_{\mathfrak m}$ be the group defined above. Then in $G_{\mathfrak m}$:
+\begin{enumerate}
+\item $X_{-1}(u)\neq1$ for every $u\in\CC$ with $u\neq0$;
+\item $Y_{-1}(u)\neq1$ for every $u\in\CC$ with $u\neq0$;
+\item $H_1(s)\neq1$ for every $s\in\CC^\times$ with $s\ne1$;
+\item $H_2(s)\neq1$ for every $s\in\CC^\times$ with $s\neq1$;
+\item $X_e(u)\ne1$ for every $e\in E$ and every $u\in\CC$ with $u\neq0$;
+\item $Y_e(u)\neq 1$ for every $e\in E$ and every $u\in\CC$ with $u\ne0$.
+\end{enumerate}
+\end{theorem}
+
+This is the statement requested by the authors, with $c$ allowed to be an arbitrary function. It therefore covers in particular the coefficients of $J$. The answer to the authors' question is that the relations are consistent in the stated sense: no generator family collapses.
+
+The excluded parameter values are genuinely trivial. (Im:1a) with $u=v=0$ gives $X_e(0)^2=X_e(0)$, hence $X_e(0)=1$. Likewise (H:1a) gives $H_1(1)=1$, and similarly for the other families. This observation is not part of the formal development.
+
+\section{Lemmas}
+
+\paragraph{Notation.} In $\GL_2(\CC)$ we use the matrices
+\[
+n^+(u)=\begin{pmatrix}1&u\\0&1\end{pmatrix},\quad n^-(u)=\begin{pmatrix}1&0\\u&1\end{pmatrix},\quad d(a,b)=\begin{pmatrix}a&0\\0&b\end{pmatrix},\quad W=\begin{pmatrix}0&1\\-1&0\end{pmatrix}.
+\]
+Let $P=\CC[x_0,x_1,z]$ be the polynomial ring in three variables. For $m=(m_0,m_1,m_2)\in\NN^3$ write $\mathbf x^m=x_0^{m_0}x_1^{m_1}z^{m_2}$, and for $v\in P$ let $\coeff_m(v)$ be the coefficient of $\mathbf x^m$ in $v$. Let $\Aut_\CC(P)$ be the group of $\CC$-linear bijections $P\to P$, with product given by composition.
+
+For a matrix $g=\begin{pmatrix}g_{11}&g_{12}\\g_{21}&g_{22}\end{pmatrix}$ let $\sigma_g$ be the $\CC$-algebra endomorphism of $P$ defined by
+\[
+\sigma_g(x_0)=g_{11}x_0+g_{21}x_1,\qquad \sigma_g(x_1)=g_{12}x_0+g_{22}x_1,\qquad \sigma_g(z)=\det(g)\,z .
+\]
+
+\begin{definition}
+A \emph{substitution representation} is a group homomorphism $\rho\colon\GL_2(\CC)\to\Aut_\CC(P)$ such that $\rho(g)(f)=\sigma_g(f)$ for all $g\in\GL_2(\CC)$ and $f\in P$.
+
+A \emph{transvection family} is a map assigning to every $p,q\in\NN^3$ and $u\in\CC$ an element $\tau_{p,q}(u)\in\Aut_\CC(P)$ such that, whenever $p\neq q$,
+\[
+\tau_{p,q}(u)(v)=v+u\,\coeff_q(v)\,\mathbf x^p\qquad\text{for all } u\in\CC,\ v\in P .
+\]
+\end{definition}
+
+\subsection{The real part and the index reflection}
+
+\begin{lemma}[The real generators in $\GL_2$]\label{lem:gm_gl2_rel}
+Let $f_0\colon\mathcal X\to\GL_2(\CC)$ be a map such that:
+\begin{itemize}
+\item $f_0(H_1(s))=d(s,1)$ and $f_0(H_2(s))=d(1,s)$ for all $s\in\CC^\times$;
+\item $f_0(X_{-1}(u))=n^+(u)$ and $f_0(Y_{-1}(u))=n^-(u)$ for all $u\in\CC$;
+\item $f_0(X_e(u))=f_0(Y_e(u))=1$ for all $e\in E$ and $u\in\CC$.
+\end{itemize}
+Then $\widehat{f_0}(r)=1$ for every $r\in\mathcal R$.
+\end{lemma}
+
+\begin{proof}
+Write $\varphi=\widehat{f_0}$. We first compute the images of the abbreviations. We have $n^+(s)n^-(-s^{-1})=\begin{pmatrix}0&s\\-s^{-1}&1\end{pmatrix}$, hence
+\[
+\varphi(\wt(s))=\begin{pmatrix}0&s\\-s^{-1}&0\end{pmatrix},\qquad \varphi(\wt)=W,\qquad W^{-1}=\begin{pmatrix}0&-1\\1&0\end{pmatrix}.
+\]
+We now check each family.
+
+\emph{Families involving $X_e$ or $Y_e$.} Under $\varphi$ every $X_e(\cdot)$ and $Y_e(\cdot)$ becomes $1$.
+\begin{itemize}
+\item (Im:1) and (Im:2) map to $1$ directly.
+\item (Im:6) maps to $hh^{-1}=1$.
+\item The commutators (U:1) and (U:2) have an identity entry and so map to $1$.
+\item (U:4) maps to $WW^{-1}=1$.
+\end{itemize}
+
+\emph{Torus and root groups.} (H:1a), (H:1b), (H:2), (Re:1a), (Re:1b) hold because diagonal matrices multiply entrywise and $n^\pm(u)n^\pm(v)=n^\pm(u+v)$.
+
+\emph{(Re:2).} A direct computation gives
+\[
+n^-(-t)n^+(s)n^-(t)=\begin{pmatrix}1+st&s\\-t^2s&1-st\end{pmatrix}.
+\]
+For the other side, note that
+\[
+n^+(P)n^-(Q)n^+(R)=\begin{pmatrix}1+PQ&P+R(1+PQ)\\Q&1+QR\end{pmatrix}.
+\]
+With $P=-t^{-1}$, $Q=-t^2s$, $R=t^{-1}$ we get $PQ=ts$, $P+R(1+PQ)=s$ and $QR=-ts$, so both sides agree.
+
+\emph{(Re:3).} We have $\varphi(\wt(s))W=d(-s,-s^{-1})=d(-s,1)\,d(1,-s^{-1})$.
+
+\emph{(Re:4) and (Re:5).} A direct computation gives
+\[
+Wn^+(u)W^{-1}=n^-(-u),\quad Wn^-(u)W^{-1}=n^+(-u),\quad W d(s,1)W^{-1}=d(1,s),\quad Wd(1,s)W^{-1}=d(s,1).
+\]
+
+\emph{(Re:6).} We have
+\[
+d(s,1)n^+(u)d(s,1)^{-1}=n^+(su),\quad d(1,s)n^+(u)d(1,s)^{-1}=n^+(s^{-1}u),
+\]
+\[
+d(s,1)n^-(u)d(s,1)^{-1}=n^-(s^{-1}u),\quad d(1,s)n^-(u)d(1,s)^{-1}=n^-(su).
+\]
+
+\emph{(U:5a).} First, $d(-s^{-1},-s)W=\begin{pmatrix}0&-s^{-1}\\ s&0\end{pmatrix}$. Multiplying on the left by $n^+(s^{-1})$ gives $\begin{pmatrix}1&-s^{-1}\\ s&0\end{pmatrix}$. Multiplying this on the right by $n^+(s^{-1})$ gives $n^-(s)$, as required.
+\end{proof}
+
+\begin{lemma}[The reflection is an involution]\label{lem:gm_refl_refl}
+For every $e\in E$ we have $(e^\ast)^\ast=e$.
+\end{lemma}
+
+\begin{proof}
+The $j$- and $k$-components are unchanged by reflection. For the first component, $\ell_e\le j_e-1$ gives $j_e-1-(j_e-1-\ell_e)=\ell_e$.
+\end{proof}
+
+\begin{lemma}[The Weyl element]\label{lem:gm_weyl_matrix}
+Let $g_1,g_2\in\GL_2(\CC)$ have matrices $n^+(1)$ and $n^-(-1)$. Then the matrix of $g_1g_2g_1$ is $W$.
+\end{lemma}
+
+\begin{proof}
+We have $n^+(1)n^-(-1)=\begin{pmatrix}0&1\\-1&1\end{pmatrix}$. Multiplying on the right by $n^+(1)$ gives $\begin{pmatrix}0&1\\-1&0\end{pmatrix}$.
+\end{proof}
+
+\subsection{Substitutions and monomial transvections}
+
+\begin{lemma}[Substitutions compose]\label{lem:gm_aeval_subst_mul}
+For all $g,h\in\GL_2(\CC)$ and $f\in P$ we have $\sigma_g(\sigma_h(f))=\sigma_{gh}(f)$.
+\end{lemma}
+
+\begin{proof}
+Both $\sigma_g\circ\sigma_h$ and $\sigma_{gh}$ are $\CC$-algebra endomorphisms of $P$, so it suffices to compare them on $x_0,x_1,z$. We have
+\[
+\sigma_g(\sigma_h(x_0))=h_{11}(g_{11}x_0+g_{21}x_1)+h_{21}(g_{12}x_0+g_{22}x_1)=(gh)_{11}x_0+(gh)_{21}x_1=\sigma_{gh}(x_0).
+\]
+Similarly,
+\[
+\sigma_g(\sigma_h(x_1))=h_{12}(g_{11}x_0+g_{21}x_1)+h_{22}(g_{12}x_0+g_{22}x_1)=(gh)_{12}x_0+(gh)_{22}x_1.
+\]
+Finally, $\sigma_g(\sigma_h(z))=\det h\det g\,z=\det(gh)\,z$.
+\end{proof}
+
+\begin{lemma}[The identity substitution]\label{lem:gm_aeval_subst_one}
+For every $f\in P$ we have $\sigma_1(f)=f$.
+\end{lemma}
+
+\begin{proof}
+The algebra endomorphism $\sigma_1$ fixes $x_0$, $x_1$ and $z$, so it is the identity.
+\end{proof}
+
+\begin{lemma}[Inverse of an elementary operator]\label{lem:gm_L_inv}
+Let $p,q\in\NN^3$ with $p\neq q$, and let $N\colon P\to P$ be the linear map $N(f)=\coeff_q(f)\,\mathbf x^p$. If $u,v\in\CC$ satisfy $u+v=0$, then
+\[
+(\id+uN)\circ(\id+vN)=\id .
+\]
+\end{lemma}
+
+\begin{proof}
+For $f\in P$ we have $N(N(f))=\coeff_q(f)\coeff_q(\mathbf x^p)\,\mathbf x^p=0$, because $p\ne q$. Hence
+\[
+(\id+uN)(\id+vN)=\id+(u+v)N+uvN^2=\id .
+\]
+\end{proof}
+
+\begin{lemma}[Additivity of transvections]\label{lem:gm_tau_add}
+Let $\tau$ be a transvection family and $p,q\in\NN^3$ with $p\neq q$. Then $\tau_{p,q}(u)\tau_{p,q}(v)=\tau_{p,q}(u+v)$ for all $u,v\in\CC$.
+\end{lemma}
+
+\begin{proof}
+For $w\in P$, write $w'=w+v\coeff_q(w)\mathbf x^p$. Then
+\[
+\tau_{p,q}(u)(\tau_{p,q}(v)(w))=w'+u\coeff_q(w')\,\mathbf x^p .
+\]
+Since $\coeff_q(\mathbf x^p)=0$, we have $\coeff_q(w')=\coeff_q(w)$. The right-hand side is therefore $w+(u+v)\coeff_q(w)\mathbf x^p=\tau_{p,q}(u+v)(w)$.
+\end{proof}
+
+\begin{lemma}[The $\mathrm{SL}_2$ relation for transvections]\label{lem:gm_tau_sl2}
+Let $\tau$ be a transvection family and $p,q\in\NN^3$ with $p\ne q$. Let $a,b,\kappa\in\CC$ with $ab=\kappa$ and $\kappa\ne0$, and let $s,t\in\CC^\times$. Then
+\[
+\tau_{q,p}(-bt)\,\tau_{p,q}(as)\,\tau_{q,p}(bt)=\tau_{p,q}\!\left(a\tfrac{-t^{-1}}{\kappa}\right)\tau_{q,p}(-b\kappa t^2s)\,\tau_{p,q}\!\left(a\tfrac{t^{-1}}{\kappa}\right).
+\]
+\end{lemma}
+
+\begin{proof}
+Let $P'$ be the span of all monomials other than $\mathbf x^p$ and $\mathbf x^q$, and let $\Pi=\CC\mathbf x^p\oplus\CC\mathbf x^q$, so that $P=P'\oplus\Pi$.
+
+For $u\in\CC$ the operators $\tau_{p,q}(u)$ and $\tau_{q,p}(u)$ fix $P'$ pointwise, since $\coeff_q$ and $\coeff_p$ vanish there. They also map $\Pi$ into itself. In the basis $(\mathbf x^p,\mathbf x^q)$ of $\Pi$:
+\begin{itemize}
+\item $\tau_{p,q}(u)$ sends $\mathbf x^p\mapsto\mathbf x^p$ and $\mathbf x^q\mapsto\mathbf x^q+u\mathbf x^p$, so its matrix is $n^+(u)$;
+\item $\tau_{q,p}(u)$ has matrix $n^-(u)$.
+\end{itemize}
+Composition of operators corresponds to the product of matrices, so the claim reduces to an identity in $\GL_2(\CC)$.
+
+Put $S=as$ and $T=bt$, so that $ST=\kappa st$ and $-T^2S=-b\kappa t^2s$. By the computation in the proof of \cref{lem:gm_gl2_rel},
+\[
+n^-(-T)n^+(S)n^-(T)=\begin{pmatrix}1+\kappa st&as\\-b\kappa t^2s&1-\kappa st\end{pmatrix}.
+\]
+For the right-hand side, set $P_0=-at^{-1}/\kappa$, $Q=-b\kappa t^2s$ and $R=at^{-1}/\kappa$. Then $P_0Q=\kappa ts$ and $P_0+R(1+P_0Q)=P_0QR=as$. Moreover $1+QR=1-abts=1-\kappa ts$. So $n^+(P_0)n^-(Q)n^+(R)$ is the same matrix.
+\end{proof}
+
+\begin{lemma}[Commuting transvections]\label{lem:gm_tau_comm}
+Let $\tau$ be a transvection family and $p,q,p',q'\in\NN^3$ with $p\neq q$, $p'\neq q'$, $p\ne p'$ and $q\neq q'$. Then
+\[
+\tau_{p,q}(u)\,\tau_{q',p'}(v)=\tau_{q',p'}(v)\,\tau_{p,q}(u)\qquad\text{for all } u,v\in\CC.
+\]
+\end{lemma}
+
+\begin{proof}
+For $w\in P$ we have $\tau_{q',p'}(v)(w)=w+v\coeff_{p'}(w)\mathbf x^{q'}$.
+
+Applying $\tau_{p,q}(u)$, and using $\coeff_q(\mathbf x^{q'})=0$ (as $q'\neq q$), gives
+\[
+w+v\coeff_{p'}(w)\mathbf x^{q'}+u\coeff_q(w)\mathbf x^p .
+\]
+In the other order, $\coeff_{p'}(\mathbf x^p)=0$ (as $p\ne p'$), so we get the same element.
+\end{proof}
+
+\begin{lemma}[Transvections are nontrivial]\label{lem:gm_tau_ne_one}
+Let $\tau$ be a transvection family, $p,q\in\NN^3$ with $p\neq q$, and $u\in\CC$ with $u\neq0$. Then $\tau_{p,q}(u)\neq 1$.
+\end{lemma}
+
+\begin{proof}
+We have $\tau_{p,q}(u)(\mathbf x^q)=\mathbf x^q+u\mathbf x^p$. Its coefficient at $p$ is $u\neq0$, whereas $\coeff_p(\mathbf x^q)=0$.
+\end{proof}
+
+\begin{lemma}[Conjugating a transvection]\label{lem:gm_conj_tau}
+Let $\tau$ be a transvection family, $\varphi\in\Aut_\CC(P)$, and $p,q,p',q'\in\NN^3$ with $p\ne q$ and $p'\ne q'$. Let $\mu,\nu\in\CC$ satisfy
+\[
+\varphi(\mathbf x^p)=\mu\,\mathbf x^{p'}\qquad\text{and}\qquad \coeff_q(\varphi^{-1}(v))=\nu\coeff_{q'}(v)\ \text{ for all } v\in P .
+\]
+Then $\varphi\,\tau_{p,q}(u)\,\varphi^{-1}=\tau_{p',q'}(\mu\nu u)$ for every $u\in\CC$.
+\end{lemma}
+
+\begin{proof}
+For $v\in P$, linearity of $\varphi$ gives
+\[
+\varphi\bigl(\varphi^{-1}v+u\coeff_q(\varphi^{-1}v)\mathbf x^p\bigr)=v+u\,\nu\coeff_{q'}(v)\,\mu\,\mathbf x^{p'}=\tau_{p',q'}(\mu\nu u)(v).
+\]
+\end{proof}
+
+\subsection{The substitution representation}
+
+In this subsection $\rho$ is a substitution representation and $\tau$ is a transvection family.
+
+\begin{lemma}[Diagonal matrices on monomials]\label{lem:gm_rho_diag_monomial}
+Let $\rho$ be a substitution representation, and let $g\in\GL_2(\CC)$ have matrix $d(a,b)$ with $a,b\in\CC$. Then for every $m\in\NN^3$,
+\[
+\rho(g)(\mathbf x^m)=a^{m_0}b^{m_1}(ab)^{m_2}\,\mathbf x^m .
+\]
+\end{lemma}
+
+\begin{proof}
+The substitution $\sigma_g$ sends $x_0\mapsto ax_0$, $x_1\mapsto bx_1$ and $z\mapsto ab\,z$. Since $\sigma_g$ is multiplicative, it sends $x_0^{m_0}x_1^{m_1}z^{m_2}$ to $(ax_0)^{m_0}(bx_1)^{m_1}(abz)^{m_2}$.
+\end{proof}
+
+\begin{lemma}[Diagonal matrices on coefficients]\label{lem:gm_coeff_rho_diag}
+Let $\rho$ be a substitution representation, and let $g\in\GL_2(\CC)$ have matrix $d(a,b)$. Then for all $q\in\NN^3$ and $v\in P$,
+\[
+\coeff_q(\rho(g)v)=a^{q_0}b^{q_1}(ab)^{q_2}\coeff_q(v).
+\]
+\end{lemma}
+
+\begin{proof}
+Both sides are linear in $v$, so it suffices to take $v=r\mathbf x^m$ with $r\in\CC$. By \cref{lem:gm_rho_diag_monomial}, $\rho(g)v=r\,a^{m_0}b^{m_1}(ab)^{m_2}\mathbf x^m$.
+
+If $m=q$, both sides equal $r\,a^{q_0}b^{q_1}(ab)^{q_2}$. If $m\ne q$, both sides are $0$.
+\end{proof}
+
+\begin{lemma}[The Weyl element on monomials]\label{lem:gm_rho_W_monomial}
+Let $\rho$ be a substitution representation, and let $g\in\GL_2(\CC)$ have matrix $W$. Let $m,m'\in\NN^3$ with $m'_0=m_1$, $m'_1=m_0$ and $m'_2=m_2$. Then
+\[
+\rho(g)(\mathbf x^m)=(-1)^{m_0}\,\mathbf x^{m'} .
+\]
+\end{lemma}
+
+\begin{proof}
+Since $\det W=1$, the substitution $\sigma_W$ sends $x_0\mapsto -x_1$, $x_1\mapsto x_0$ and $z\mapsto z$. Hence
+\[
+\mathbf x^m\mapsto (-x_1)^{m_0}x_0^{m_1}z^{m_2}=(-1)^{m_0}x_0^{m'_0}x_1^{m'_1}z^{m'_2}.
+\]
+\end{proof}
+
+\begin{lemma}[The inverse Weyl element on coefficients]\label{lem:gm_coeff_rho_W_inv}
+Let $\rho$ be a substitution representation, and let $g\in\GL_2(\CC)$ have matrix $W$. Let $q,q'\in\NN^3$ with $q'_0=q_1$, $q'_1=q_0$ and $q'_2=q_2$. Then for every $v\in P$,
+\[
+\coeff_q(\rho(g)^{-1}v)=(-1)^{q_0}\coeff_{q'}(v).
+\]
+\end{lemma}
+
+\begin{proof}
+We first show that $\coeff_{q'}(\rho(g)w)=(-1)^{q_0}\coeff_q(w)$ for all $w\in P$. By linearity it suffices to take $w=r\mathbf x^m$. Let $m'=(m_1,m_0,m_2)$. By \cref{lem:gm_rho_W_monomial},
+\[
+\coeff_{q'}(\rho(g)w)=r(-1)^{m_0}[m'=q'],
+\]
+where $[\,\cdot\,]$ is $1$ if the condition holds and $0$ otherwise. Since $m'=q'$ if and only if $m=q$, this equals $(-1)^{q_0}\,r[m=q]=(-1)^{q_0}\coeff_q(w)$.
+
+Now apply this to $w=\rho(g)^{-1}v$ and multiply by $(-1)^{q_0}$, using $((-1)^{q_0})^2=1$.
+\end{proof}
+
+\begin{lemma}[Upper unipotents fix monomials without $x_1$]\label{lem:gm_rho_ux_monomial}
+Let $\rho$ be a substitution representation, and let $g\in\GL_2(\CC)$ have matrix $n^+(u)$. If $m\in\NN^3$ satisfies $m_1=0$, then $\rho(g)(\mathbf x^m)=\mathbf x^m$.
+\end{lemma}
+
+\begin{proof}
+The substitution $\sigma_g$ fixes $x_0$ and $z$, and sends $x_1\mapsto ux_0+x_1$. A monomial with $m_1=0$ involves only $x_0$ and $z$, so it is fixed.
+\end{proof}
+
+\begin{lemma}[Upper unipotents on coefficients]\label{lem:gm_coeff_rho_ux_inv}
+Let $\rho$ be a substitution representation, and let $g\in\GL_2(\CC)$ have matrix $n^+(u)$. If $q\in\NN^3$ satisfies $q_0=0$, then $\coeff_q(\rho(g)^{-1}v)=\coeff_q(v)$ for all $v\in P$.
+\end{lemma}
+
+\begin{proof}
+Let $\epsilon$ be the substitution $x_0\mapsto0$, $x_1\mapsto x_1$, $z\mapsto z$. We use two facts.
+
+First, $\epsilon$ kills the monomials with $m_0>0$ and fixes the others. Since $q_0=0$, this gives $\coeff_q(\epsilon f)=\coeff_q(f)$ for all $f$.
+
+Second, $\epsilon\circ\sigma_g=\epsilon$, as both are algebra maps and agree on generators:
+\[
+\epsilon(x_0)=0,\qquad \epsilon(ux_0+x_1)=x_1,\qquad \epsilon(z)=z .
+\]
+Hence
+\[
+\coeff_q(\rho(g)^{-1}v)=\coeff_q(\epsilon\rho(g)^{-1}v)=\coeff_q(\epsilon\,\rho(g)\rho(g)^{-1}v)=\coeff_q(\epsilon v)=\coeff_q(v).
+\]
+\end{proof}
+
+\begin{lemma}[Lower unipotents fix monomials without $x_0$]\label{lem:gm_rho_uy_monomial}
+Let $\rho$ be a substitution representation, and let $g\in\GL_2(\CC)$ have matrix $n^-(u)$. If $m\in\NN^3$ satisfies $m_0=0$, then $\rho(g)(\mathbf x^m)=\mathbf x^m$.
+\end{lemma}
+
+\begin{proof}
+The substitution $\sigma_g$ sends $x_0\mapsto x_0+ux_1$ and fixes $x_1$ and $z$. A monomial with $m_0=0$ involves only $x_1$ and $z$, so it is fixed.
+\end{proof}
+
+\begin{lemma}[Lower unipotents on coefficients]\label{lem:gm_coeff_rho_uy_inv}
+Let $\rho$ be a substitution representation, and let $g\in\GL_2(\CC)$ have matrix $n^-(u)$. If $q\in\NN^3$ satisfies $q_1=0$, then $\coeff_q(\rho(g)^{-1}v)=\coeff_q(v)$ for all $v\in P$.
+\end{lemma}
+
+\begin{proof}
+This is the same as the proof of \cref{lem:gm_coeff_rho_ux_inv}, using the substitution $\epsilon'$ given by $x_0\mapsto x_0$, $x_1\mapsto0$, $z\mapsto z$.
+
+Since $q_1=0$, we have $\coeff_q(\epsilon'f)=\coeff_q(f)$. Moreover $\epsilon'\circ\sigma_g=\epsilon'$, because $\epsilon'(x_0+ux_1)=x_0$.
+\end{proof}
+
+\begin{lemma}[Torus conjugation of transvections]\label{lem:gm_conj_diag}
+Let $\rho$ be a substitution representation and $\tau$ a transvection family. Let $g\in\GL_2(\CC)$ have matrix $d(a,b)$ with $a,b\neq0$. Let $p,q\in\NN^3$ with $p\ne q$, and let $\kappa,\alpha\in\CC$ satisfy
+\[
+a^{p_0+p_2}b^{p_1+p_2}=\kappa\,a^{q_0+q_2}b^{q_1+q_2}.
+\]
+Then $\rho(g)\,\tau_{p,q}(\alpha u)\,\rho(g)^{-1}=\tau_{p,q}(\alpha\kappa u)$ for every $u\in\CC$.
+\end{lemma}
+
+\begin{proof}
+For $m\in\NN^3$ put $\omega_m=a^{m_0}b^{m_1}(ab)^{m_2}=a^{m_0+m_2}b^{m_1+m_2}$. Then $\omega_q\ne0$ and, by hypothesis, $\omega_p=\kappa\omega_q$.
+
+By \cref{lem:gm_rho_diag_monomial}, $\rho(g)\mathbf x^p=\omega_p\mathbf x^p$. Applying \cref{lem:gm_coeff_rho_diag} to $\rho(g)^{-1}v$ gives $\coeff_q(v)=\omega_q\coeff_q(\rho(g)^{-1}v)$, that is, $\coeff_q(\rho(g)^{-1}v)=\omega_q^{-1}\coeff_q(v)$.
+
+Now \cref{lem:gm_conj_tau} with $\mu=\omega_p$ and $\nu=\omega_q^{-1}$ yields $\tau_{p,q}(\omega_p\omega_q^{-1}\alpha u)=\tau_{p,q}(\kappa\alpha u)$.
+\end{proof}
+
+\begin{lemma}[Weyl conjugation of transvections]\label{lem:gm_conj_W}
+Let $\rho$ be a substitution representation and $\tau$ a transvection family. Let $g\in\GL_2(\CC)$ have matrix $W$. Let $p,q,p',q'\in\NN^3$ with $p\ne q$ and $p'\neq q'$, such that
+\[
+p'_0=p_1,\quad p'_1=p_0,\quad p'_2=p_2,\qquad q'_0=q_1,\quad q'_1=q_0,\quad q'_2=q_2 .
+\]
+Let $\alpha,\alpha',\sigma\in\CC$ satisfy $(-1)^{p_0}(-1)^{q_0}\alpha=\alpha'\sigma$. Then
+\[
+\rho(g)\,\tau_{p,q}(\alpha u)\,\rho(g)^{-1}=\tau_{p',q'}(\alpha'\sigma u)\qquad\text{for every } u\in\CC .
+\]
+\end{lemma}
+
+\begin{proof}
+By \cref{lem:gm_rho_W_monomial}, $\rho(g)\mathbf x^p=(-1)^{p_0}\mathbf x^{p'}$. By \cref{lem:gm_coeff_rho_W_inv}, $\coeff_q(\rho(g)^{-1}v)=(-1)^{q_0}\coeff_{q'}(v)$.
+
+So \cref{lem:gm_conj_tau} with $\mu=(-1)^{p_0}$ and $\nu=(-1)^{q_0}$ gives $\tau_{p',q'}((-1)^{p_0}(-1)^{q_0}\alpha u)=\tau_{p',q'}(\alpha'\sigma u)$.
+\end{proof}
+
+\begin{lemma}[Upper unipotents commute with suitable transvections]\label{lem:gm_comm_ux}
+Let $\rho$ be a substitution representation and $\tau$ a transvection family. Let $g\in\GL_2(\CC)$ have matrix $n^+(t)$, and let $p,q\in\NN^3$ with $p\neq q$, $p_1=0$ and $q_0=0$. Then $\rho(g)\tau_{p,q}(u)=\tau_{p,q}(u)\rho(g)$ for every $u\in\CC$.
+\end{lemma}
+
+\begin{proof}
+By \cref{lem:gm_rho_ux_monomial}, $\rho(g)\mathbf x^p=\mathbf x^p$. By \cref{lem:gm_coeff_rho_ux_inv}, $\coeff_q(\rho(g)^{-1}v)=\coeff_q(v)$.
+
+Hence \cref{lem:gm_conj_tau} with $\mu=\nu=1$ gives $\rho(g)\tau_{p,q}(u)\rho(g)^{-1}=\tau_{p,q}(u)$. Multiplying on the right by $\rho(g)$ gives the claim.
+\end{proof}
+
+\begin{lemma}[Lower unipotents commute with suitable transvections]\label{lem:gm_comm_uy}
+Let $\rho$ be a substitution representation and $\tau$ a transvection family. Let $g\in\GL_2(\CC)$ have matrix $n^-(t)$, and let $p,q\in\NN^3$ with $p\neq q$, $p_0=0$ and $q_1=0$. Then $\rho(g)\tau_{p,q}(u)=\tau_{p,q}(u)\rho(g)$ for every $u\in\CC$.
+\end{lemma}
+
+\begin{proof}
+This is as in \cref{lem:gm_comm_ux}, using \cref{lem:gm_rho_uy_monomial}, \cref{lem:gm_coeff_rho_uy_inv} and \cref{lem:gm_conj_tau} with $\mu=\nu=1$.
+\end{proof}
+
+\subsection{Numerical identities}
+
+\begin{lemma}[Splitting a power]\label{lem:gm_pow_inv_mul}
+Let $x\in\CC$ with $x\neq 0$, and $a,k\in\NN$. Then $x^a=(x^k)^{-1}x^{a+k}$.
+\end{lemma}
+
+\begin{proof}
+We have $x^{a+k}=x^kx^a$ and $x^k\ne0$.
+\end{proof}
+
+\begin{lemma}[The constants are nonzero]\label{lem:gm_cst_ne_zero}
+If $\ell,j\in\NN$ and $\ell<j$, then $c_{\ell j}\neq0$.
+\end{lemma}
+
+\begin{proof}
+Each factor of $c_{\ell j}$ is nonzero:
+\begin{itemize}
+\item $(-1)^{\ell+1}\ne0$;
+\item $\binom{j-1}{\ell}>0$, because $\ell\le j-1$;
+\item $\ell+1\neq0$;
+\item $j-\ell\ne0$, because $j\ne\ell$.
+\end{itemize}
+\end{proof}
+
+\begin{lemma}[The constant of the reflected index]\label{lem:gm_pos_cst}
+If $\ell,j\in\NN$ and $\ell<j$, then
+\[
+(-1)^{\ell+1}\cdot\bigl(-c_{\ell j}(-1)^{j-\ell-1}\bigr)=c_{j-1-\ell,\,j}.
+\]
+\end{lemma}
+
+\begin{proof}
+Write $j=\ell+d+1$ with $d\in\NN$, so that $j-\ell-1=j-1-\ell=d$. Then
+\[
+c_{\ell j}=(-1)^{\ell+1}\binom{\ell+d}{\ell}(\ell+1)(d+1),\qquad c_{d j}=(-1)^{d+1}\binom{\ell+d}{d}(d+1)(\ell+1).
+\]
+The left-hand side equals $(-1)^{2\ell+2}(-1)^{d+1}\binom{\ell+d}{\ell}(\ell+1)(d+1)$. This is $c_{dj}$, by the symmetry $\binom{\ell+d}{\ell}=\binom{\ell+d}{d}$.
+\end{proof}
+
+\begin{lemma}[First sign identity]\label{lem:gm_pos_signX}
+Let $\ell,a,b\in\NN$ with $a=1$ and $b=0$. Then $(-1)^a(-1)^b\cdot1=(-1)^{\ell+1}(-1)^\ell$.
+\end{lemma}
+
+\begin{proof}
+Both sides equal $-1$, since $(-1)^{\ell+1}(-1)^\ell=-((-1)^\ell)^2$.
+\end{proof}
+
+\begin{lemma}[Second sign identity]\label{lem:gm_pos_signY}
+Let $\ell,j,a,b\in\NN$ with $a=0$ and $b=1$, and let $\kappa\in\CC$. Put $n=j\monus\ell\monus1$ (truncated subtraction). Then
+\[
+(-1)^a(-1)^b\kappa=-\bigl(\kappa(-1)^{n}\bigr)(-1)^{n}.
+\]
+\end{lemma}
+
+\begin{proof}
+Both sides equal $-\kappa$, since $((-1)^n)^2=1$.
+\end{proof}
+
+\begin{lemma}[Third sign identity]\label{lem:gm_pos_signX'}
+Let $\ell,j,a,b\in\NN$ with $\ell<j\le2\ell$, $a=0$ and $b=2\ell-j$. Then
+\[
+(-1)^a(-1)^b(-1)^{\ell+1}=1\cdot(-1)^{j-1-\ell}.
+\]
+\end{lemma}
+
+\begin{proof}
+The exponents satisfy $(2\ell-j)+(\ell+1)=(j-1-\ell)+2(2\ell-j+1)$. They therefore differ by an even number.
+\end{proof}
+
+\begin{lemma}[Fourth sign identity]\label{lem:gm_pos_signY'}
+Let $\ell,j,a,b\in\NN$ with $\ell<j\le2\ell$, $a=2\ell-j$ and $b=0$, and let $\kappa\in\CC$. Then
+\[
+(-1)^a(-1)^b\cdot\bigl(-\kappa(-1)^{j-\ell-1}\bigr)=\kappa(-1)^{j-(j-1-\ell)-1}.
+\]
+\end{lemma}
+
+\begin{proof}
+On the right, $j-(j-1-\ell)-1=\ell$. Write $j=\ell+d+1$; then $j\le2\ell$ gives $\ell=d+e+1$ with $e=2\ell-j\in\NN$.
+
+The left-hand side is $-(-1)^{e}(-1)^{d}\kappa$, and the right-hand side is $(-1)^{d+e+1}\kappa$. These are equal.
+\end{proof}
+
+\subsection{Verifying the relations family by family}
+
+In the next six lemmas, $T$ is a group, $G\colon E\times\CC\to T$ is written $(g,u)\mapsto G_g(u)$, $e\in E$, and $A,A'\colon\CC\to T$ satisfy the \emph{support hypothesis}
+\[
+G_e(u)=A(u),\qquad G_{e^\ast}(u)=A'(u),\qquad G_g(u)=1\ \text{ whenever } g\notin\{e,e^\ast\},\qquad\text{for all }u\in\CC .
+\]
+When $e^\ast=e$ this forces $A=A'$.
+
+\begin{lemma}[Additivity on a family]\label{lem:gm_fam_add}
+Assume the support hypothesis, and that $A(u)A(v)=A(u+v)$ and $A'(u)A'(v)=A'(u+v)$ for all $u,v$. Then $G_g(u)G_g(v)=G_g(u+v)$ for all $g\in E$ and $u,v\in\CC$.
+\end{lemma}
+
+\begin{proof}
+If $g=e$ this is the hypothesis on $A$. Otherwise, if $g=e^\ast$, it is the hypothesis on $A'$. Otherwise both sides are $1$.
+\end{proof}
+
+\begin{lemma}[Conjugation on a family]\label{lem:gm_fam_conj}
+Assume the support hypothesis. Let $h\in T$ and $\mu\colon E\to\CC$ satisfy, for all $u$,
+\[
+hA(u)h^{-1}=A(\mu(e)u)\qquad\text{and}\qquad hA'(u)h^{-1}=A'(\mu(e^\ast)u).
+\]
+Then $hG_g(u)h^{-1}=G_g(\mu(g)u)$ for all $g\in E$ and $u\in\CC$.
+\end{lemma}
+
+\begin{proof}
+The cases $g=e$ and then $g=e^\ast$ are the two hypotheses. If $g\notin\{e,e^\ast\}$, both sides are $1$.
+\end{proof}
+
+\begin{lemma}[Weyl conjugation on a family]\label{lem:gm_fam_weyl}
+Assume the support hypothesis. Let $h\in T$ and $\mu\colon E\to\CC$ satisfy, for all $u$,
+\[
+hA(u)h^{-1}=A'(\mu(e)u)\qquad\text{and}\qquad hA'(u)h^{-1}=A(\mu(e^\ast)u).
+\]
+Then $hG_g(u)h^{-1}=G_{g^\ast}(\mu(g)u)$ for all $g\in E$ and $u\in\CC$.
+\end{lemma}
+
+\begin{proof}
+If $g=e$, the left side is $hA(u)h^{-1}=A'(\mu(e)u)=G_{e^\ast}(\mu(e)u)$.
+
+If $g=e^\ast$, the left side is $A(\mu(e^\ast)u)=G_e(\mu(e^\ast)u)$, and $e=(e^\ast)^\ast$ by \cref{lem:gm_refl_refl}.
+
+Otherwise the left side is $1$. In that case $g^\ast\notin\{e,e^\ast\}$: by \cref{lem:gm_refl_refl}, $g^\ast=e$ would give $g=e^\ast$, and $g^\ast=e^\ast$ would give $g=e$. So the right side is $1$ as well.
+\end{proof}
+
+\begin{lemma}[Commutation with an external family]\label{lem:gm_fam_comm1}
+Assume the support hypothesis. Let $h\colon\CC\to T$ and let $\mathsf P$ be a property of elements of $E$. Assume:
+\begin{itemize}
+\item if $\mathsf P(e)$, then $h(u)A(v)=A(v)h(u)$ for all $u,v$;
+\item if $\mathsf P(e^\ast)$, then $h(u)A'(v)=A'(v)h(u)$ for all $u,v$.
+\end{itemize}
+Then $h(u)G_g(v)=G_g(v)h(u)$ for every $g\in E$ with $\mathsf P(g)$ and all $u,v\in\CC$.
+\end{lemma}
+
+\begin{proof}
+Distinguish the cases $g=e$, $g=e^\ast$ and $g\notin\{e,e^\ast\}$. In the last case $G_g(v)=1$.
+\end{proof}
+
+\begin{lemma}[The commutation relation (U:2) on families]\label{lem:gm_fam_U2}
+Let $G,H\colon E\times\CC\to T$ satisfy the support hypothesis with $(A,A')$ and $(B,B')$ respectively, for the same $e$. Assume:
+\begin{itemize}
+\item if $|\ell_e-\ell_{e^\ast}|>1$, then $A(u)B'(v)=B'(v)A(u)$ for all $u,v$;
+\item if $|\ell_{e^\ast}-\ell_e|>1$, then $A'(u)B(v)=B(v)A'(u)$ for all $u,v$.
+\end{itemize}
+Then for all $f,g\in E$ with $j_f\neq j_g$ or $k_f\neq k_g$ or $|\ell_f-\ell_g|>1$, and all $u,v$,
+\[
+G_f(u)H_g(v)=H_g(v)G_f(u).
+\]
+\end{lemma}
+
+\begin{proof}
+\emph{Case $f=e$.}
+\begin{itemize}
+\item $g=e$ is impossible, since all three alternatives fail for $f=g$.
+\item If $g=e^\ast$, then $j$ and $k$ agree, so $|\ell_e-\ell_{e^\ast}|>1$ and the first hypothesis applies.
+\item If $g\notin\{e,e^\ast\}$, then $H_g(v)=1$.
+\end{itemize}
+
+\emph{Case $f=e^\ast\neq e$.}
+\begin{itemize}
+\item If $g=e$, the second hypothesis applies by the same reasoning.
+\item $g=e^\ast$ is impossible.
+\item Otherwise $H_g(v)=1$.
+\end{itemize}
+
+\emph{Case $f\notin\{e,e^\ast\}$.} Then $G_f(u)=1$.
+\end{proof}
+
+\begin{lemma}[The relation (Im:2) on families]\label{lem:gm_fam_XY}
+Let $G,H$ be as in \cref{lem:gm_fam_U2}. Assume that for all $s,t\in\CC^\times$,
+\[
+B(-t)A(s)B(t)=A\!\left(\tfrac{-t^{-1}}{c_e}\right)B(-c_et^2s)A\!\left(\tfrac{t^{-1}}{c_e}\right),
+\]
+and the same identity holds with $A',B',c_{e^\ast}$ in place of $A,B,c_e$. Then for all $g\in E$ and $s,t\in\CC^\times$,
+\[
+H_g(-t)G_g(s)H_g(t)=G_g\!\left(\tfrac{-t^{-1}}{c_g}\right)H_g(-c_gt^2s)G_g\!\left(\tfrac{t^{-1}}{c_g}\right).
+\]
+\end{lemma}
+
+\begin{proof}
+For $g=e$ and for $g=e^\ast$ this is a hypothesis. For $g\notin\{e,e^\ast\}$ all six factors are $1$.
+\end{proof}
+
+\begin{lemma}[Sufficient conditions for a homomorphism out of $G_{\mathfrak m}$]\label{lem:gm_rel_of}
+Let $T$ be a group, $F\colon\mathcal X\to T$ a map, $\rho\colon\GL_2(\CC)\to T$ a group homomorphism, and $f_0\colon\mathcal X\to\GL_2(\CC)$ a map with $\widehat{f_0}(r)=1$ for all $r\in\mathcal R$. Put $\Omega=F(X_{-1}(1))F(Y_{-1}(-1))F(X_{-1}(1))$. Assume:
+\begin{enumerate}
+\item $F(\xi)=\rho(f_0(\xi))$ for every $\xi$ of the form $H_1(s)$, $H_2(s)$ ($s\in\CC^\times$), $X_{-1}(u)$ or $Y_{-1}(u)$ ($u\in\CC$);
+\item $F(X_g(u))F(X_g(v))=F(X_g(u+v))$ and $F(Y_g(u))F(Y_g(v))=F(Y_g(u+v))$ for all $g\in E$ and $u,v\in\CC$;
+\item for all $g\in E$ and $s,t\in\CC^\times$,
+\[
+F(Y_g(-t))F(X_g(s))F(Y_g(t))=F\Bigl(X_g\bigl(\tfrac{-t^{-1}}{c_g}\bigr)\Bigr)F(Y_g(-c_gt^2s))F\Bigl(X_g\bigl(\tfrac{t^{-1}}{c_g}\bigr)\Bigr);
+\]
+\item for all $s\in\CC^\times$, $g\in E$ and $u\in\CC$, writing $h_i=F(H_i(s))$:
+\[
+h_1F(X_g(u))h_1^{-1}=F(X_g(s^{\ell_g+1}u)),\qquad h_2F(X_g(u))h_2^{-1}=F(X_g(s^{j_g-\ell_g}u)),
+\]
+\[
+h_1F(Y_g(u))h_1^{-1}=F(Y_g((s^{-1})^{\ell_g+1}u)),\qquad h_2F(Y_g(u))h_2^{-1}=F(Y_g((s^{-1})^{j_g-\ell_g}u));
+\]
+\item for all $g\in E$ with $\ell_g=j_g-1$ and all $u,v$, the element $F(X_{-1}(u))$ commutes with $F(X_g(v))$, and $F(Y_{-1}(u))$ commutes with $F(Y_g(v))$;
+\item for all $g\in E$ with $\ell_g=0$ and all $u,v$, the element $F(Y_{-1}(u))$ commutes with $F(X_g(v))$, and $F(X_{-1}(u))$ commutes with $F(Y_g(v))$;
+\item for all $f,g\in E$ with $j_f\ne j_g$ or $k_f\ne k_g$ or $|\ell_f-\ell_g|>1$, and all $u,v$, the element $F(X_f(u))$ commutes with $F(Y_g(v))$;
+\item for all $g\in E$ and $u\in\CC$,
+\[
+\Omega F(X_g(u))\Omega^{-1}=F(X_{g^\ast}((-1)^{\ell_g}u))\qquad\text{and}\qquad \Omega F(Y_g(u))\Omega^{-1}=F(Y_{g^\ast}((-1)^{j_g-\ell_g-1}u)).
+\]
+\end{enumerate}
+Then $\widehat F(r)=1$ for every $r\in\mathcal R$.
+\end{lemma}
+
+\begin{proof}
+\emph{Relators in the real symbols.} The families (H:1a)--(Re:6d) and (U:5a) involve only the symbols in (1); recall that $\wt(s)$ and $\wt$ are words in $X_{-1},Y_{-1}$. On words in these symbols $\widehat F=\rho\circ\widehat{f_0}$ by (1). Hence $\widehat F(r)=\rho(1)=1$.
+
+\emph{Remaining relators.} For the others, $\widehat F(r)$ is the corresponding expression in $T$:
+\begin{itemize}
+\item (Im:1a) gives $F(X_e(u))F(X_e(v))F(X_e(u+v))^{-1}$, which is $1$ by (2), and likewise for (Im:1b);
+\item (Im:2) is trivial by (3);
+\item (Im:6a)--(Im:6d) are trivial by (4);
+\item (U:1a), (U:1b) are trivial by (5), and (U:1c), (U:1d) by (6);
+\item (U:2) is trivial by (7);
+\item for (U:4a), (U:4b) note $\widehat F(\wt)=\Omega$, since $\wt=X_{-1}(1)Y_{-1}(-1)X_{-1}(1)$; they are trivial by (8).
+\end{itemize}
+\end{proof}
+
+\section{Proof of the theorem}
+
+Fix $c\colon\NN\to\NN$.
+
+\paragraph{Step 1: the real generators.}
+Define $f_0\colon\mathcal X\to\GL_2(\CC)$ by
+\[
+H_1(s)\mapsto d(s,1),\quad H_2(s)\mapsto d(1,s),\quad X_{-1}(u)\mapsto n^+(u),\quad Y_{-1}(u)\mapsto n^-(u),\quad X_e(u),\,Y_e(u)\mapsto1 .
+\]
+By \cref{lem:gm_gl2_rel}, $\widehat{f_0}$ kills $\mathcal R$. So there is a homomorphism $\varphi_0\colon G_{\mathfrak m}\to\GL_2(\CC)$ extending $f_0$.
+
+If $X_{-1}(u)=1$, then the $(1,2)$-entry of $\varphi_0(X_{-1}(u))=n^+(u)$ equals that of the identity, so $u=0$. Similarly:
+\begin{itemize}
+\item the $(2,1)$-entry handles $Y_{-1}(u)$;
+\item the $(1,1)$-entry of $d(s,1)$ gives $s=1$ if $H_1(s)=1$;
+\item the $(2,2)$-entry of $d(1,s)$ handles $H_2(s)$.
+\end{itemize}
+This proves (1)--(4).
+
+\paragraph{Step 2: a substitution representation.}
+For $g\in\GL_2(\CC)$ let $\rho(g)=\sigma_g$. By \cref{lem:gm_aeval_subst_mul} and \cref{lem:gm_aeval_subst_one},
+\[
+\sigma_g\sigma_{g^{-1}}=\sigma_1=\id=\sigma_{g^{-1}}\sigma_g,
+\]
+so $\rho(g)\in\Aut_\CC(P)$. By \cref{lem:gm_aeval_subst_mul}, $\rho(gh)=\rho(g)\rho(h)$. Thus $\rho$ is a substitution representation.
+
+\paragraph{Step 3: a transvection family.}
+Put $\tau_{p,p}(u)=\id$. For $p\neq q$ put $\tau_{p,q}(u)=\id+uN_{p,q}$, where $N_{p,q}(f)=\coeff_q(f)\mathbf x^p$. By \cref{lem:gm_L_inv}, applied with $(u,-u)$ and $(-u,u)$, this is invertible with inverse $\id-uN_{p,q}$. By construction $\tau_{p,q}(u)(v)=v+u\coeff_q(v)\mathbf x^p$, so $\tau$ is a transvection family.
+
+\paragraph{Step 4: a general criterion.}
+For $m\in\NN^3$ write $\bar m=(m_1,m_0,m_2)$.
+
+\emph{Claim.} Let $e\in E$, and write $\ell=\ell_e$, $j=j_e$, $\ell^\ast=\ell_{e^\ast}=j-1-\ell$. Let $p,q,p',q'\in\NN^3$ and $\alpha,\beta,\alpha',\beta'\in\CC$ satisfy:
+\begin{enumerate}
+\item[(a)] $p\neq q$ and $p'\ne q'$;
+\item[(b)] $\alpha\beta=c_{\ell j}$ and $\alpha'\beta'=c_{\ell^\ast j}$;
+\item[(c)] $p_0+p_2=q_0+q_2+(\ell+1)$ and $p_1+p_2=q_1+q_2+(j-\ell)$; moreover $p'_0+p'_2=q'_0+q'_2+(\ell^\ast+1)$ and $p'_1+p'_2=q'_1+q'_2+(j-\ell^\ast)$;
+\item[(d)] $p'=\bar p$ and $q'=\bar q$;
+\item[(e)] the four sign conditions
+\begin{align*}
+(-1)^{p_0}(-1)^{q_0}\alpha&=\alpha'(-1)^{\ell}, & (-1)^{q_0}(-1)^{p_0}\beta&=\beta'(-1)^{j-\ell-1},\\
+(-1)^{p'_0}(-1)^{q'_0}\alpha'&=\alpha(-1)^{\ell^\ast}, & (-1)^{q'_0}(-1)^{p'_0}\beta'&=\beta(-1)^{j-\ell^\ast-1};
+\end{align*}
+\item[(f)] if $\ell=j-1$ then $p_1=q_0=0$; if $\ell=0$ then $p_0=q_1=0$; if $\ell^\ast=j-1$ then $p'_1=q'_0=0$; if $\ell^\ast=0$ then $p'_0=q'_1=0$;
+\item[(g)] if $|\ell-\ell^\ast|>1$ then $p\neq p'$ and $q\neq q'$;
+\item[(h)] if $e^\ast=e$ then $p'=p$, $q'=q$, $\alpha'=\alpha$ and $\beta'=\beta$.
+\end{enumerate}
+Then for every $u\in\CC$ with $u\neq0$, the four elements $X_e(u)$, $Y_e(u)$, $X_{e^\ast}(u)$, $Y_{e^\ast}(u)$ of $G_{\mathfrak m}$ are all different from $1$.
+
+Conditions (c) say that the rank-one operator $v\mapsto\coeff_q(v)\mathbf x^p$ has torus weight $(\ell+1,j-\ell)$, which is what (Im:6) prescribes. Condition (d) matches the action of the Weyl element.
+
+\emph{Proof of the claim.} By (b) and \cref{lem:gm_cst_ne_zero}, $\alpha,\beta,\alpha',\beta'$ are all nonzero. Define $F\colon\mathcal X\to\Aut_\CC(P)$ as follows. On real symbols put $F(\xi)=\rho(f_0(\xi))$. On imaginary symbols put
+\[
+F(X_g(u))=\begin{cases}\tau_{p,q}(\alpha u)&g=e,\\ \tau_{p',q'}(\alpha'u)&g=e^\ast\neq e,\\ 1&\text{otherwise,}\end{cases}\qquad
+F(Y_g(u))=\begin{cases}\tau_{q,p}(\beta u)&g=e,\\ \tau_{q',p'}(\beta'u)&g=e^\ast\ne e,\\ 1&\text{otherwise.}\end{cases}
+\]
+By (h), the support hypothesis holds for the family $G_g(u)=F(X_g(u))$ with $A(u)=\tau_{p,q}(\alpha u)$ and $A'(u)=\tau_{p',q'}(\alpha'u)$. It also holds for $H_g(u)=F(Y_g(u))$ with $B(u)=\tau_{q,p}(\beta u)$ and $B'(u)=\tau_{q',p'}(\beta'u)$.
+
+We verify the hypotheses of \cref{lem:gm_rel_of}, with $\widehat{f_0}(\mathcal R)=1$ by \cref{lem:gm_gl2_rel}.
+\begin{itemize}
+\item (1) holds by definition.
+\item (2): \cref{lem:gm_fam_add}, where additivity of $A,A',B,B'$ is \cref{lem:gm_tau_add}, since $\alpha u+\alpha v=\alpha(u+v)$.
+\item (3): \cref{lem:gm_fam_XY}. Its hypotheses are \cref{lem:gm_tau_sl2}, applied to $(p,q,\alpha,\beta,\kappa=c_{\ell j})$ and to $(p',q',\alpha',\beta',c_{\ell^\ast j})$, using (b) and \cref{lem:gm_cst_ne_zero}.
+\item (4): \cref{lem:gm_fam_conj}, with $h=\rho(d(s,1))$ and $\mu(g)=s^{\ell_g+1}$, respectively $h=\rho(d(1,s))$ and $\mu(g)=s^{j_g-\ell_g}$. The conjugation formulas for $A,A'$ come from \cref{lem:gm_conj_diag} with $(a,b)=(s,1)$ or $(1,s)$; its hypothesis is exactly (c). For the $Y$-family the transvections are $\tau_{q,p}$. Then \cref{lem:gm_conj_diag} is applied with $p,q$ exchanged and $\kappa=(s^{-1})^{\ell+1}$ (resp.\ $(s^{-1})^{j-\ell}$). The required weight identity $s^{q_0+q_2}=(s^{\ell+1})^{-1}s^{p_0+p_2}$ follows from (c) and \cref{lem:gm_pow_inv_mul}, and similarly for the other index.
+\item (5) and (6): \cref{lem:gm_fam_comm1}. Take $\mathsf P(g)$ to be $\ell_g=j_g-1$, respectively $\ell_g=0$, and $h(u)=F(X_{-1}(u))=\rho(n^+(u))$ or $F(Y_{-1}(u))=\rho(n^-(u))$.
+  \begin{itemize}
+  \item $X_{-1}$ against $X_e$: \cref{lem:gm_comm_ux} for $\tau_{p,q}$, needing $p_1=q_0=0$.
+  \item $Y_{-1}$ against $Y_e$: \cref{lem:gm_comm_uy} for $\tau_{q,p}$, needing $q_0=p_1=0$.
+  \item $Y_{-1}$ against $X_e$: \cref{lem:gm_comm_uy} for $\tau_{p,q}$, needing $p_0=q_1=0$.
+  \item $X_{-1}$ against $Y_e$: \cref{lem:gm_comm_ux} for $\tau_{q,p}$, needing $q_1=p_0=0$.
+  \end{itemize}
+  The needed vanishing is supplied by (f), for $e$ and for $e^\ast$.
+\item (7): \cref{lem:gm_fam_U2}, whose two hypotheses follow from \cref{lem:gm_tau_comm}. For $\tau_{p,q}$ against $\tau_{q',p'}$ we need $p\ne p'$ and $q\neq q'$; for $\tau_{p',q'}$ against $\tau_{q,p}$ the same. Both follow from (g), since $|\ell^\ast-\ell|=|\ell-\ell^\ast|$.
+\item (8): By \cref{lem:gm_weyl_matrix}, $\Omega=\rho\bigl(n^+(1)n^-(-1)n^+(1)\bigr)=\rho(g_W)$ with $g_W$ of matrix $W$. Apply \cref{lem:gm_fam_weyl} with $h=\Omega$ and $\mu(g)=(-1)^{\ell_g}$ for $X$, and $\mu(g)=(-1)^{j_g-\ell_g-1}$ for $Y$. The four required conjugation formulas are \cref{lem:gm_conj_W}, applied to $(p,q)\to(p',q')$, to $(p',q')\to(p,q)$ (note $\bar{\bar m}=m$), and to the exchanged pairs $(q,p)\to(q',p')$ and $(q',p')\to(q,p)$. In each case the sign hypothesis of \cref{lem:gm_conj_W} is one of the four identities in (e).
+\end{itemize}
+
+Hence $\widehat F$ kills $\mathcal R$, and $F$ induces a homomorphism $\Phi\colon G_{\mathfrak m}\to\Aut_\CC(P)$. For $u\neq0$:
+\[
+\Phi(X_e(u))=\tau_{p,q}(\alpha u),\quad \Phi(Y_e(u))=\tau_{q,p}(\beta u),\quad \Phi(X_{e^\ast}(u))=\tau_{p',q'}(\alpha'u),\quad \Phi(Y_{e^\ast}(u))=\tau_{q',p'}(\beta'u),
+\]
+using (h) when $e^\ast=e$. The parameters $\alpha u,\beta u,\alpha'u,\beta'u$ are nonzero, so all four images are $\neq1$ by \cref{lem:gm_tau_ne_one} and (a). This proves the claim.
+
+\paragraph{Step 5: indices with $j_e\le2\ell_e$.}
+Let $e\in E$ with $j\le 2\ell$; then $\ell\geq1$. Apply the claim with
+\[
+p=(1,0,\ell),\quad q=(0,2\ell-j,0),\quad p'=(0,1,\ell),\quad q'=(2\ell-j,0,0),
+\]
+\[
+\alpha=1,\quad\beta=c_{\ell j},\quad \alpha'=(-1)^{\ell+1},\quad \beta'=-c_{\ell j}(-1)^{j-\ell-1}.
+\]
+In words, $p,q$ correspond to the monomials $x_0z^\ell$ and $x_1^{2\ell-j}$, and $p',q'$ to their Weyl images $x_1z^\ell$ and $x_0^{2\ell-j}$. We check the conditions.
+\begin{itemize}
+\item (a): the $0$-th coordinates of $p,q$ differ, and the first coordinates of $p',q'$ differ.
+\item (b): the first identity is trivial; the second is \cref{lem:gm_pos_cst}.
+\item (c): $1+\ell=0+(\ell+1)$ and $\ell=(2\ell-j)+(j-\ell)$. Further, $\ell=(2\ell-j)+(j-1-\ell)+1$ and $1+\ell=j-(j-1-\ell)$.
+\item (d): clear.
+\item (e): \cref{lem:gm_pos_signX}, \cref{lem:gm_pos_signY}, \cref{lem:gm_pos_signX'} and \cref{lem:gm_pos_signY'}.
+\item (f): If $\ell=j-1$, then $p_1=q_0=0$ holds. The case $\ell=0$ cannot occur, since $j\le 2\ell$ and $j>0$. The case $\ell^\ast=j-1$ would mean $\ell=0$, which is again impossible. If $\ell^\ast=0$, then $p'_0=q'_1=0$ holds.
+\item (g): $p_0\ne p'_0$. If $|\ell-\ell^\ast|=|2\ell-j+1|>1$, then $2\ell-j\neq0$, so $q_1\ne q'_1$.
+\item (h): vacuous, since $e^\ast=e$ would force $j=2\ell+1$.
+\end{itemize}
+So $X_e(u),Y_e(u),X_{e^\ast}(u),Y_{e^\ast}(u)\neq1$ for $u\ne0$.
+
+\paragraph{Step 6: indices with $j_e=2\ell_e+1$.}
+Here $\ell^\ast=\ell$, so $e^\ast=e$. Apply the claim with
+\[
+p=p'=(\ell,\ell,1),\quad q=q'=(0,0,0),\quad \alpha=\alpha'=1,\quad \beta=\beta'=c_{\ell j}.
+\]
+That is, $(x_0x_1)^\ell z$ against the constant $1$. We check the conditions.
+\begin{itemize}
+\item (a): the $z$-exponents differ.
+\item (b): $c_{\ell^\ast j}=c_{\ell j}$.
+\item (c): $\ell+1=\ell+1$ and $\ell+1=j-\ell$.
+\item (d): $\bar p=p$ and $\bar q=q$.
+\item (e): all reduce to $(-1)^\ell=(-1)^\ell$, because $j-\ell-1=\ell$.
+\item (f): $\ell=j-1$ forces $\ell=0$, and then all exponents in question vanish.
+\item (g): vacuous, since $|\ell-\ell^\ast|=0$.
+\item (h): holds by construction.
+\end{itemize}
+So $X_e(u),Y_e(u)\ne1$ for $u\neq0$.
+
+\paragraph{Step 7: conclusion.}
+Let $e\in E$ and $u\neq0$, and compare $2\ell_e+1$ with $j_e$.
+\begin{itemize}
+\item If $2\ell_e+1>j_e$, then $j_e\le2\ell_e$ and Step 5 applies to $e$.
+\item If $2\ell_e+1=j_e$, Step 6 applies.
+\item If $2\ell_e+1<j_e$, then $j_{e^\ast}=j_e\le2(j_e-1-\ell_e)=2\ell_{e^\ast}$. Step 5 applied to $e^\ast$ shows $X_{(e^\ast)^\ast}(u),Y_{(e^\ast)^\ast}(u)\ne1$, and $(e^\ast)^\ast=e$ by \cref{lem:gm_refl_refl}.
+\end{itemize}
+This proves (5) and (6), and together with Step 1 completes the proof of \cref{thm:main}. \qed
+
+\paragraph{Relation to the source.}
+The source gives no proof; the authors asked whether the relations are consistent. The finding is positive: no generator family collapses, so there is nothing to report as a collapse.
+
+The proof uses all relation families as listed, over the full index set $E$. The constraint $j=2\ell+1$ is not imposed and (Im:2) is not removed; no relation was changed. The function $c$ is arbitrary, so the result holds in particular for the coefficients of $J$.
+
+Nontriviality is witnessed by different representations for different index pairs $\{e,e^\ast\}$, each of which kills all other imaginary generators. The argument therefore says nothing beyond the six non-triviality statements of \cref{thm:main}. For instance, it does not show that distinct generators remain distinct in $G_{\mathfrak m}$, nor does it provide a single faithful representation.
+
+\appendix
+\section{Correspondence with the formal proof}
+Each lemma of the text and the Lean declaration that states it; \cref{thm:main} is \texttt{gsimplegm\_consistent}.
+
+\begin{longtable}{@{}lll@{}}
+\toprule
+Lemma & Lean declaration & Status \\
+\midrule
+\endhead
+\cref{lem:gm_gl2_rel} & \texttt{gm\_gl2\_rel} & verified \\
+\cref{lem:gm_refl_refl} & \texttt{gm\_refl\_refl} & verified \\
+\cref{lem:gm_weyl_matrix} & \texttt{gm\_weyl\_matrix} & verified \\
+\cref{lem:gm_aeval_subst_mul} & \texttt{gm\_aeval\_subst\_mul} & verified \\
+\cref{lem:gm_aeval_subst_one} & \texttt{gm\_aeval\_subst\_one} & verified \\
+\cref{lem:gm_L_inv} & \texttt{gm\_L\_inv} & verified \\
+\cref{lem:gm_tau_add} & \texttt{gm\_tau\_add} & verified \\
+\cref{lem:gm_tau_sl2} & \texttt{gm\_tau\_sl2} & verified \\
+\cref{lem:gm_tau_comm} & \texttt{gm\_tau\_comm} & verified \\
+\cref{lem:gm_tau_ne_one} & \texttt{gm\_tau\_ne\_one} & verified \\
+\cref{lem:gm_conj_tau} & \texttt{gm\_conj\_tau} & verified \\
+\cref{lem:gm_rho_diag_monomial} & \texttt{gm\_rho\_diag\_monomial} & verified \\
+\cref{lem:gm_coeff_rho_diag} & \texttt{gm\_coeff\_rho\_diag} & verified \\
+\cref{lem:gm_rho_W_monomial} & \texttt{gm\_rho\_W\_monomial} & verified \\
+\cref{lem:gm_coeff_rho_W_inv} & \texttt{gm\_coeff\_rho\_W\_inv} & verified \\
+\cref{lem:gm_rho_ux_monomial} & \texttt{gm\_rho\_ux\_monomial} & verified \\
+\cref{lem:gm_coeff_rho_ux_inv} & \texttt{gm\_coeff\_rho\_ux\_inv} & verified \\
+\cref{lem:gm_rho_uy_monomial} & \texttt{gm\_rho\_uy\_monomial} & verified \\
+\cref{lem:gm_coeff_rho_uy_inv} & \texttt{gm\_coeff\_rho\_uy\_inv} & verified \\
+\cref{lem:gm_conj_diag} & \texttt{gm\_conj\_diag} & verified \\
+\cref{lem:gm_conj_W} & \texttt{gm\_conj\_W} & verified \\
+\cref{lem:gm_comm_ux} & \texttt{gm\_comm\_ux} & verified \\
+\cref{lem:gm_comm_uy} & \texttt{gm\_comm\_uy} & verified \\
+\cref{lem:gm_pow_inv_mul} & \texttt{gm\_pow\_inv\_mul} & verified \\
+\cref{lem:gm_cst_ne_zero} & \texttt{gm\_cst\_ne\_zero} & verified \\
+\cref{lem:gm_pos_cst} & \texttt{gm\_pos\_cst} & verified \\
+\cref{lem:gm_pos_signX} & \texttt{gm\_pos\_signX} & verified \\
+\cref{lem:gm_pos_signY} & \texttt{gm\_pos\_signY} & verified \\
+\cref{lem:gm_pos_signX'} & \texttt{gm\_pos\_signX'} & verified \\
+\cref{lem:gm_pos_signY'} & \texttt{gm\_pos\_signY'} & verified \\
+\cref{lem:gm_fam_add} & \texttt{gm\_fam\_add} & verified \\
+\cref{lem:gm_fam_conj} & \texttt{gm\_fam\_conj} & verified \\
+\cref{lem:gm_fam_weyl} & \texttt{gm\_fam\_weyl} & verified \\
+\cref{lem:gm_fam_comm1} & \texttt{gm\_fam\_comm1} & verified \\
+\cref{lem:gm_fam_U2} & \texttt{gm\_fam\_U2} & verified \\
+\cref{lem:gm_fam_XY} & \texttt{gm\_fam\_XY} & verified \\
+\cref{lem:gm_rel_of} & \texttt{gm\_rel\_of} & verified \\
+\bottomrule
+\end{longtable}
+\end{document}
