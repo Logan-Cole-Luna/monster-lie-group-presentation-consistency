@@ -182,13 +182,13 @@
 \begin{document}
 \maketitle
 \begin{abstract}
-The group $G_{\mathfrak m}$ of the source (Section 7, the presentation theorem) is given by generators $H_1(s),H_2(s),X_{-1}(u),Y_{-1}(u),X_{\ell,jk}(u),Y_{\ell,jk}(u)$ and a list of relations. The authors asked whether these relations force some generator to be trivial. The formal proof shows that they do not: every generator family survives, and no relation was removed or modified. The proof uses the full index set (no constraint $j=2\ell+1$), keeps relation (Im:2), and allows an arbitrary function $c\colon\mathbb N\to\mathbb N$. Non-triviality comes from explicit homomorphisms. The real generators are detected by a homomorphism to $\mathrm{GL}_2(\mathbb C)$. Each imaginary generator is detected by a homomorphism to the linear automorphism group of $\mathbb C[X_0,X_1,Z]$, in which the imaginary generators act as transvections between two suitably chosen monomials.
+The group $G_{\mathfrak m}$ is given by generators $H_1(s),H_2(s),X_{-1}(u),Y_{-1}(u),X_{\ell,jk}(u),Y_{\ell,jk}(u)$ and a list of relations. The authors asked whether these relations force some generator to be trivial. The formal proof shows that they do not: every generator family survives, and no relation was removed or modified. The proof uses the full index set (no constraint $j=2\ell+1$), keeps relation (Im:2), and allows an arbitrary function $c\colon\mathbb N\to\mathbb N$. Non-triviality comes from explicit homomorphisms. The real generators are detected by a homomorphism to $\mathrm{GL}_2(\mathbb C)$. Each imaginary generator is detected by a homomorphism to the linear automorphism group of $\mathbb C[X_0,X_1,Z]$, in which the imaginary generators act as transvections between two suitably chosen monomials.
 \end{abstract}
 
 \begin{center}\small
 \begin{tabular}{@{}ll@{}}
 \toprule
-Source & Carbone, Jurisich, Murray, A Lie group analog for the Monster Lie algebra (journal version, 2026-10-21), Section 7, GSimpleGm\_Consistent \\
+Source & A group presentation associated with the Monster Lie algebra \\
 Lean & leanprover/lean4:v4.23.0, Mathlib 37df177aaa \\
 Machine checks & compiles; no \texttt{sorry}; statement matches target; module build \\
 Axioms & \texttt{propext}, \texttt{Classical.choice}, \texttt{Quot.sound} \\
@@ -347,7 +347,7 @@ Here $j-1$ is truncated subtraction in $\N$; it is irrelevant on $E_c$, where $j
 \end{leanblock}
 
 \paragraph{Abbreviations in the free group.}
-In the free group $F(\Gen_c)$ we write $H_1(s),H_2(s),X_{-1}(u),Y_{-1}(u),X_e(u),Y_e(u)$ for the images of the symbols. We also use the following abbreviations:
+In the free group $F(\Gen_c)$ we write $H_1(s)$, $H_2(s)$, $X_{-1}(u)$, $Y_{-1}(u)$, $X_e(u)$, $Y_e(u)$ for the images of the symbols. We also use the following abbreviations:
 \begin{itemize}
 \item $\wt_{-1}(s)=X_{-1}(s)\,Y_{-1}(-s^{-1})\,X_{-1}(s)$ for $s\in\C^\times$, as in (Re:0);
 \item $\wt_{-1}=\wt_{-1}(1)=X_{-1}(1)Y_{-1}(-1)X_{-1}(1)$;

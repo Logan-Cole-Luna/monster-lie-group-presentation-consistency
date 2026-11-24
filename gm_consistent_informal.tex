@@ -36,16 +36,17 @@
 
 \title{Consistency of the presentation of $G_{\mathfrak m}$: no generator is forced to be trivial}
 \date{}
+\setlength{\emergencystretch}{3em}
 \begin{document}
 \maketitle
 \begin{abstract}
-We study the group $G_{\mathfrak m}$, defined by generators and relations in Section 7 of the source (the presentation theorem). The authors asked whether its relations are consistent, and the answer is yes. For an arbitrary function $c\colon\mathbb N\to\mathbb N$ in place of the coefficients of $J$, none of the generators $X_{-1}(u)$, $Y_{-1}(u)$ ($u\neq0$), $H_1(s)$, $H_2(s)$ ($s\neq1$), $X_{\ell,jk}(u)$, $Y_{\ell,jk}(u)$ ($u\neq0$) is trivial in $G_{\mathfrak m}$. The real generators are detected by the natural map to $\mathrm{GL}_2(\mathbb C)$. Each pair of imaginary generators $X_{\ell,jk},Y_{\ell,jk}$ is detected by a representation on $\mathbb C[x_0,x_1,z]$: there $\mathrm{GL}_2(\mathbb C)$ acts by linear substitution, and $X_{\ell,jk},Y_{\ell,jk}$ act as transvections between two monomials of suitable torus weights, while all other imaginary generators act trivially. All lemmas and the main theorem are machine-verified, with the full index set and all listed relations, (Im:2) included.
+We study the group $G_{\mathfrak m}$, defined by generators and relations. The authors asked whether its relations are consistent, and the answer is yes. For an arbitrary function $c\colon\mathbb N\to\mathbb N$ in place of the coefficients of $J$, none of the generators $X_{-1}(u)$, $Y_{-1}(u)$ ($u\neq0$), $H_1(s)$, $H_2(s)$ ($s\neq1$), $X_{\ell,jk}(u)$, $Y_{\ell,jk}(u)$ ($u\neq0$) is trivial in $G_{\mathfrak m}$. The real generators are detected by the natural map to $\mathrm{GL}_2(\mathbb C)$. Each pair of imaginary generators $X_{\ell,jk},Y_{\ell,jk}$ is detected by a representation on $\mathbb C[x_0,x_1,z]$: there $\mathrm{GL}_2(\mathbb C)$ acts by linear substitution, and $X_{\ell,jk},Y_{\ell,jk}$ act as transvections between two monomials of suitable torus weights, while all other imaginary generators act trivially. All lemmas and the main theorem are machine-verified, with the full index set and all listed relations, (Im:2) included.
 \end{abstract}
 
 \begin{center}\small
 \begin{tabular}{@{}ll@{}}
 \toprule
-Source & Carbone, Jurisich, Murray, A Lie group analog for the Monster Lie algebra (journal version, 2026-10-21), Section 7, GSimpleGm\_Consistent \\
+Source & A group presentation associated with the Monster Lie algebra \\
 Status & proof machine-verified (Lean 4, Mathlib) \\
 Lemmas & 37 \\
 Text & written by claude-opus-5-5, checked against the Lean source \\
@@ -95,7 +96,7 @@ and write $(a,b)=aba^{-1}b^{-1}$ for the commutator. These are abbreviations for
 \begin{definition}[Relators and the group $G_{\mathfrak m}$]
 A relation $a=b$ is encoded by the relator $ab^{-1}$, and a relation $(a,b)=1$ by the relator $(a,b)$. Let $\mathcal R\subseteq F(\mathcal X)$ be the set of relators of the following families. Each family is imposed for all $s,t\in\CC^\times$, all $u,v\in\CC$ and all $e,f\in E$ satisfying the stated side conditions.
 
-\begin{align*}
+{\small\begin{align*}
 &\text{(H:1a)} & H_1(s)H_1(t)&=H_1(st), & &\text{(H:1b)} & H_2(s)H_2(t)&=H_2(st),\\
 &\text{(H:2)} & H_1(s)H_2(t)&=H_2(t)H_1(s), & &\text{(Re:1a)} & X_{-1}(u)X_{-1}(v)&=X_{-1}(u+v),\\
 &\text{(Re:1b)} & Y_{-1}(u)Y_{-1}(v)&=Y_{-1}(u+v), & &\text{(Re:3)} & \wt(s)\wt&=H_1(-s)H_2(-s^{-1}),\\
@@ -104,7 +105,7 @@ A relation $a=b$ is encoded by the relator $ab^{-1}$, and a relation $(a,b)=1$ b
 &\text{(Re:6a)} & H_1(s)X_{-1}(u)H_1(s)^{-1}&=X_{-1}(su), & &\text{(Re:6b)} & H_2(s)X_{-1}(u)H_2(s)^{-1}&=X_{-1}(s^{-1}u),\\
 &\text{(Re:6c)} & H_1(s)Y_{-1}(u)H_1(s)^{-1}&=Y_{-1}(s^{-1}u), & &\text{(Re:6d)} & H_2(s)Y_{-1}(u)H_2(s)^{-1}&=Y_{-1}(su),\\
 &\text{(Im:1a)} & X_e(u)X_e(v)&=X_e(u+v), & &\text{(Im:1b)} & Y_e(u)Y_e(v)&=Y_e(u+v).
-\end{align*}
+\end{align*}}
 
 The remaining families are:
 \begin{align*}
@@ -211,9 +212,10 @@ With $P=-t^{-1}$, $Q=-t^2s$, $R=t^{-1}$ we get $PQ=ts$, $P+R(1+PQ)=s$ and $QR=-t
 \emph{(Re:3).} We have $\varphi(\wt(s))W=d(-s,-s^{-1})=d(-s,1)\,d(1,-s^{-1})$.
 
 \emph{(Re:4) and (Re:5).} A direct computation gives
-\[
-Wn^+(u)W^{-1}=n^-(-u),\quad Wn^-(u)W^{-1}=n^+(-u),\quad W d(s,1)W^{-1}=d(1,s),\quad Wd(1,s)W^{-1}=d(s,1).
-\]
+\begin{gather*}
+Wn^+(u)W^{-1}=n^-(-u),\quad Wn^-(u)W^{-1}=n^+(-u),\\
+W d(s,1)W^{-1}=d(1,s),\quad Wd(1,s)W^{-1}=d(s,1).
+\end{gather*}
 
 \emph{(Re:6).} We have
 \[
